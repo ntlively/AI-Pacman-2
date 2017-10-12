@@ -82,27 +82,46 @@ class ReflexAgent(Agent):
 
         ghostList = currentGameState.getGhostPositions()
         closestGhostDist = 200
+        totalSpook=0
         closestGhost = (-99,-99)
         # print newGhostStates[0]
         for ghost in ghostList:
           spookDist = util.manhattanDistance(ghost,newPos)
+          totalSpook+=util.manhattanDistance(ghost,newPos)
           if spookDist < closestGhostDist:
             closestGhostDist = spookDist
             closestGhost = ghost
 
-        print newScaredTimes
-        if(newScaredTimes[0]==0):
-          score = successorGameState.getScore() + max(util.manhattanDistance(closestGhost,newPos),2)
+        # print newScaredTimes
+        avoid = False
+        for timer in newScaredTimes:
+          if timer == 0:
+            avoid = True
+            break
+          else:
+            avoid = False
+        
+
+        if len(ghostList)<2:
+          totalSpook=0
+        
+
+        if(avoid):
+          score = successorGameState.getScore() + max(util.manhattanDistance(closestGhost,newPos),3) + totalSpook/2
+          for ghost in successorGameState.getGhostPositions():
+            print ghost
+            print successorGameState.getPacmanPosition()
+            print "_________________________"
+            if successorGameState.getPacmanPosition() == ghost:
+              print "about to die"
+              score-=9999999999
+              return score
+            else:
+              score+=5
         else:
           score = successorGameState.getScore()
 
-
-        for ghost in successorGameState.getGhostPositions():
-          # print ghost
-          if successorGameState.getPacmanPosition() == ghost:
-             score-=8000
-
-
+        print score
         powerup = currentGameState.getCapsules()
         # print(powerup)
         closestCapDist = 200
@@ -113,9 +132,9 @@ class ReflexAgent(Agent):
             closestCap = cap
 
         if successorGameState.getPacmanPosition() in powerup:
-           score+=400
+           score+=200
         if(len(currentGameState.getCapsules()) > len(successorGameState.getCapsules())):
-          score+=400
+          score+=200
 
 
         dotList = newFood.asList()
@@ -128,12 +147,12 @@ class ReflexAgent(Agent):
         if(currentGameState.getNumFood() > successorGameState.getNumFood()):
           score+=200
         if action == Directions.STOP:
-          score-=2
+          score-=5
 
         if len(powerup)<1:
           score -= 2*util.manhattanDistance(closestDot,newPos)
         else:
-          score -= 2*util.manhattanDistance(closestDot,newPos) + 3*util.manhattanDistance(closestCap,newPos)
+          score -= 2*util.manhattanDistance(closestDot,newPos) + 2.5*util.manhattanDistance(closestCap,newPos)
         
         return score
 
