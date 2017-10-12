@@ -73,8 +73,72 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+        bigNum = 999999999999999999999
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        if successorGameState.isWin():
+          return bigNum
+
+        # powerup = currentGameState.getCapsules()
+
+        ghostList = currentGameState.getGhostPositions()
+        closestGhostDist = 200
+        closestGhost = (-99,-99)
+        # print newGhostStates[0]
+        for ghost in ghostList:
+          spookDist = util.manhattanDistance(ghost,newPos)
+          if spookDist < closestGhostDist:
+            closestGhostDist = spookDist
+            closestGhost = ghost
+
+        print newScaredTimes
+        if(newScaredTimes[0]==0):
+          score = successorGameState.getScore() + max(util.manhattanDistance(closestGhost,newPos),2)
+        else:
+          score = successorGameState.getScore()
+
+
+        for ghost in successorGameState.getGhostPositions():
+          # print ghost
+          if successorGameState.getPacmanPosition() == ghost:
+             score-=8000
+
+
+        powerup = currentGameState.getCapsules()
+        # print(powerup)
+        closestCapDist = 200
+        closestCap = (-99,-99)
+        for cap in powerup:
+          capDist = util.manhattanDistance(cap,newPos)
+          if capDist < closestCapDist:
+            closestCap = cap
+
+        if successorGameState.getPacmanPosition() in powerup:
+           score+=400
+        if(len(currentGameState.getCapsules()) > len(successorGameState.getCapsules())):
+          score+=400
+
+
+        dotList = newFood.asList()
+        closestDot = 200
+        for dot in dotList:
+          dotDist = util.manhattanDistance(dot,newPos)
+          if dotDist < closestDot:
+            closestDot = dot
+
+        if(currentGameState.getNumFood() > successorGameState.getNumFood()):
+          score+=200
+        if action == Directions.STOP:
+          score-=2
+
+        if len(powerup)<1:
+          score -= 2*util.manhattanDistance(closestDot,newPos)
+        else:
+          score -= 2*util.manhattanDistance(closestDot,newPos) + 3*util.manhattanDistance(closestCap,newPos)
+        
+        return score
+
+
+        # return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
     """
