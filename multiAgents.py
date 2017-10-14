@@ -193,30 +193,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+# _________________________________________________________________________________________________________________________
         def minimize(player, ghosts, currentState, depth):
-          if currentState.isLose() or currentState.isWin() or depth ==0:
-            return self.evaluationFunction(currentState)
           mini = float("inf")
 
-          if player < ghosts:
-            for choice in currentState.getLegalActions(player):
-              mini = min(mini, minimize(player+1, ghosts, currentState.generateSuccessor(player,choice),depth))
-          else:
-            for choice in currentState.getLegalActions(player):
-              mini = min(mini, maximize(0,ghosts,currentState.generateSuccessor(player,choice),depth-1 ))
-          return mini
-
-        def maximize(player, ghosts, currentState, depth):
           if currentState.isLose() or currentState.isWin() or depth ==0:
             return self.evaluationFunction(currentState)
+
+          for choice in currentState.getLegalActions(player):
+            if player < ghosts:
+                mini = min(mini, minimize(player+1, ghosts, currentState.generateSuccessor(player,choice),depth))
+            else:
+                mini = min(mini, maximize(0,ghosts,currentState.generateSuccessor(player,choice),depth-1 ))
+
+          return mini
+# _________________________________________________________________________________________________________________________
+        def maximize(player, ghosts, currentState, depth):
           maxi = -(float("inf"))
+
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+
           for choice in currentState.getLegalActions(player):
             maxi = max(maxi, minimize(1,ghosts,currentState.generateSuccessor(player,choice),depth))
-          return maxi
 
+          return maxi
+# _________________________________________________________________________________________________________________________
         
         currentEffort = -(float("inf"))
-        chosenDirection = Directions.STOP
+        chosenDirection = Directions.LEFT
 
         for choice in gameState.getLegalActions():
           destination = gameState.generateSuccessor(0,choice)
