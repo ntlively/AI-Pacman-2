@@ -90,7 +90,7 @@ class ReflexAgent(Agent):
             closestGhostDist = spookDist
             closestGhost = ghost
 
-        print newScaredTimes
+        # print newScaredTimes
         if(newScaredTimes[0]==0):
           score = successorGameState.getScore() + max(util.manhattanDistance(closestGhost,newPos),2)
         else:
@@ -193,7 +193,41 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def minimize(player, ghosts, currentState, depth):
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+          mini = float("inf")
+
+          if player < ghosts:
+            for choice in currentState.getLegalActions(player):
+              mini = min(mini, minimize(player+1, ghosts, currentState.generateSuccessor(player,choice),depth))
+          else:
+            for choice in currentState.getLegalActions(player):
+              mini = min(mini, maximize(0,ghosts,currentState.generateSuccessor(player,choice),depth-1 ))
+          return mini
+
+        def maximize(player, ghosts, currentState, depth):
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+          maxi = -(float("inf"))
+          for choice in currentState.getLegalActions(player):
+            maxi = max(maxi, minimize(1,ghosts,currentState.generateSuccessor(player,choice),depth))
+          return maxi
+
+        
+        currentEffort = -(float("inf"))
+        chosenDirection = Directions.STOP
+
+        for choice in gameState.getLegalActions():
+          destination = gameState.generateSuccessor(0,choice)
+          oldEffort = currentEffort
+          currentEffort = max(currentEffort, minimize(1,gameState.getNumAgents()-1,destination,self.depth))
+          if currentEffort > oldEffort:
+            chosenDirection = choice
+          
+        return chosenDirection
+
+        # util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
