@@ -193,7 +193,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-# _________________________________________________________________________________________________________________________
+#_________________________________________________________________________________________________________________________
         def minimize(player, ghosts, currentState, depth):
           mini = float("inf")
 
@@ -207,7 +207,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 mini = min(mini, maximize(0,ghosts,currentState.generateSuccessor(player,choice),depth-1 ))
 
           return mini
-# _________________________________________________________________________________________________________________________
+#_________________________________________________________________________________________________________________________
         def maximize(player, ghosts, currentState, depth):
           maxi = -(float("inf"))
 
@@ -218,7 +218,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             maxi = max(maxi, minimize(1,ghosts,currentState.generateSuccessor(player,choice),depth))
 
           return maxi
-# _________________________________________________________________________________________________________________________
+#_________________________________________________________________________________________________________________________
         
         currentEffort = -(float("inf"))
         chosenDirection = Directions.LEFT
@@ -231,7 +231,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             chosenDirection = choice
           
         return chosenDirection
-
+#_________________________________________________________________________________________________________________________
         # util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -244,7 +244,56 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+#_________________________________________________________________________________________________________________________
+        def minimize(player, ghosts, currentState, depth,alpha,beta):
+          mini = float("inf")
+
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+
+          for choice in currentState.getLegalActions(player):
+            if player < ghosts:
+                mini = min(mini, minimize(player+1, ghosts, currentState.generateSuccessor(player,choice),depth,alpha,beta))
+            else:
+                mini = min(mini, maximize(0,ghosts,currentState.generateSuccessor(player,choice),depth-1,alpha,beta))
+           
+            if mini < alpha:
+              return mini
+            beta = min(beta,mini)
+          return mini
+#_________________________________________________________________________________________________________________________
+        def maximize(player, ghosts, currentState, depth,alpha,beta):
+          maxi = -(float("inf"))
+
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+
+          for choice in currentState.getLegalActions(player):
+            maxi = max(maxi, minimize(1,ghosts,currentState.generateSuccessor(player,choice),depth,alpha,beta))
+            if maxi > beta:
+              return maxi
+            alpha = max(alpha, maxi)
+          return maxi
+#_________________________________________________________________________________________________________________________
+        
+        currentEffort =       -(float("inf"))
+        alpha =               -(float("inf"))
+        beta =                 (float("inf"))
+        chosenDirection = Directions.LEFT
+
+        for choice in gameState.getLegalActions():
+          destination = gameState.generateSuccessor(0,choice)
+          oldEffort = currentEffort
+          currentEffort = max(currentEffort, minimize(1,gameState.getNumAgents()-1,destination,self.depth,alpha,beta))
+          if currentEffort > oldEffort:
+            chosenDirection = choice
+          if currentEffort >= beta:
+            return chosenDirection
+          alpha = max(alpha,currentEffort)
+        return chosenDirection
+#_________________________________________________________________________________________________________________________
+ 
+        # util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
