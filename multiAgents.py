@@ -308,7 +308,46 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+#_________________________________________________________________________________________________________________________
+        def expectimize(player, ghosts, currentState, depth):
+          expect = 0
+
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+
+          for choice in currentState.getLegalActions(player):
+            if player < ghosts:
+                expect += expectimize(player+1, ghosts, currentState.generateSuccessor(player,choice),depth)
+            else:
+                expect += maximize(0,ghosts,currentState.generateSuccessor(player,choice),depth-1 )
+
+          return (expect / len(currentState.getLegalActions(player)))
+#_________________________________________________________________________________________________________________________
+        def maximize(player, ghosts, currentState, depth):
+          maxi = -(float("inf"))
+
+          if currentState.isLose() or currentState.isWin() or depth ==0:
+            return self.evaluationFunction(currentState)
+
+          for choice in currentState.getLegalActions(player):
+            maxi = max(maxi, expectimize(1,ghosts,currentState.generateSuccessor(player,choice),depth))
+
+          return maxi
+#_________________________________________________________________________________________________________________________
+        
+        currentEffort = -(float("inf"))
+        chosenDirection = Directions.LEFT
+
+        for choice in gameState.getLegalActions():
+          destination = gameState.generateSuccessor(0,choice)
+          oldEffort = currentEffort
+          currentEffort = max(currentEffort, expectimize(1,gameState.getNumAgents()-1,destination,self.depth))
+          if currentEffort > oldEffort:
+            chosenDirection = choice
+          
+        return chosenDirection
+#_________________________________________________________________________________________________________________________
+        # util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
     """
