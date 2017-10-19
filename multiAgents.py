@@ -354,10 +354,49 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: My previous evaluation function didn't seem to work.  Pacman makes some very studid choices, I think because we
+      now lack the chosen "action" that we had in the previous evaluation function.  I made sure to give points for winning and losing. 
+      I also wanted to award points for being away from the ghosts, eating food, and eating powerups. 
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # Useful information you can extract from a GameState (pacman.py)
+    # successorGameState = currentGameState.generatePacmanSuccessor(action)
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
+    bigNum = 999999999999999999999
+    
+    if currentGameState.isWin():
+      return bigNum
+    if currentGameState.isLose():
+      return -bigNum
+
+    score = scoreEvaluationFunction(currentGameState)
+
+    ghostList = currentGameState.getGhostPositions()
+    closestGhostDist = 200
+    closestGhost = (-99,-99)
+
+    for ghost in ghostList:
+      spookDist = util.manhattanDistance(ghost,newPos)
+      if spookDist < closestGhostDist:
+        closestGhostDist = spookDist
+        closestGhost = ghost
+
+    if(newScaredTimes[0]==0):
+      score += max(util.manhattanDistance(closestGhost,newPos),4)
+
+    powerup = currentGameState.getCapsules()
+    dotList = newFood.asList()
+
+    score-= len(dotList)
+    score-= len(powerup)
+
+    
+    return score
+    # util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
